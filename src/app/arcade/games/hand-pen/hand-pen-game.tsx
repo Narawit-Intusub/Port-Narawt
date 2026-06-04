@@ -319,6 +319,13 @@ export default function HandPenGame() {
   useEffect(() => {
     if (!scriptsLoaded || !videoRef.current || !canvasRef.current) return;
 
+    if (typeof navigator === "undefined" || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError(
+        "ไม่สามารถเข้าถึงกล้องได้เนื่องจากการเชื่อมต่อไม่ปลอดภัย (ต้องใช้ HTTPS หรือ localhost)\n\nCamera API is not supported in non-secure contexts (HTTP). Please access via HTTPS or localhost."
+      );
+      return;
+    }
+
     if (!cameraEnabled) {
       setCameraActive(false);
       setHandDetected(false);
@@ -659,7 +666,7 @@ export default function HandPenGame() {
           <div className="bg-slate-900 border-2 border-red-500/50 p-6 rounded-xl max-w-md text-center flex flex-col items-center gap-4 shadow-2xl backdrop-blur-md">
             <AlertTriangle className="size-12 text-red-500 animate-bounce" />
             <h2 className="text-red-400 font-bold text-lg tracking-wide uppercase">System Alert</h2>
-            <p className="text-slate-300 text-sm leading-relaxed font-sans">{cameraError}</p>
+            <p className="text-slate-300 text-sm leading-relaxed font-sans" style={{ whiteSpace: "pre-line" }}>{cameraError}</p>
             <button 
               onClick={() => window.location.reload()} 
               className="mt-2 px-5 py-2.5 bg-red-600/90 text-white rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-red-500 transition-colors"

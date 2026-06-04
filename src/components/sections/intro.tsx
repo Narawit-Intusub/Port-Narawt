@@ -172,7 +172,7 @@ export function IntroSection({ onOpenContact }: IntroSectionProps) {
             {/* Profile Image container */}
             <div className="relative w-full h-full overflow-hidden rounded-lg bg-card/50">
               <Image
-                src="/images/image.png"
+                src="/images/logo/image.png"
                 alt="Narawit Intusub Profile"
                 fill
                 priority
