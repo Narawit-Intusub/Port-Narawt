@@ -137,7 +137,7 @@ export default function LittlePilot() {
   const heartFrameRef = useRef({ index: 0, counter: 0 });
 
   const keysPressed = useRef<Record<string, boolean>>({});
-  const touchState = useRef({ active: false, x: 0, y: 0 });
+  const touchState = useRef({ active: false, x: 0, y: 0, lastX: 0, lastY: 0 });
 
   // Init Sound Engine
   useEffect(() => {
@@ -225,6 +225,14 @@ export default function LittlePilot() {
   // Keyboard Handlers
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent browser default scroll for game control keys in all states
+      const gameKeys = ["arrowleft", "arrowright", "arrowup", "arrowdown", "w", "a", "s", "d", " ", "spacebar", "p", "escape"];
+      if (gameKeys.includes(e.key.toLowerCase())) {
+        if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+          e.preventDefault();
+        }
+      }
+
       if (gameStateRef.current !== "playing") {
         if (e.key === "p" || e.key === "P" || e.key === "Escape") {
           if (gameStateRef.current === "paused") {
@@ -238,14 +246,10 @@ export default function LittlePilot() {
       if (e.key === "p" || e.key === "P" || e.key === "Escape") {
         setGameState("paused");
         if (soundManagerRef.current) soundManagerRef.current.stopBgm();
-        e.preventDefault();
         return;
       }
 
       keysPressed.current[e.key.toLowerCase()] = true;
-      if (e.key === " " || e.key === "Spacebar") {
-        e.preventDefault();
-      }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       keysPressed.current[e.key.toLowerCase()] = false;
@@ -352,24 +356,24 @@ export default function LittlePilot() {
         if (p.angle === 0) p.angle = -10;
       }
 
-      // Touch / Drag controls
+      // Touch / Drag controls (Relative movement delta)
       if (touchState.current.active) {
-        const targetX = touchState.current.x - p.width / 2;
-        const targetY = touchState.current.y - p.height / 2;
+        const dx = touchState.current.x - touchState.current.lastX;
+        const dy = touchState.current.y - touchState.current.lastY;
 
-        const diffX = targetX - p.x;
-        const diffY = targetY - p.y;
-
-        // Smooth move player towards touch
-        p.x += diffX * 0.15;
-        p.y += diffY * 0.15;
+        p.x += dx;
+        p.y += dy;
 
         // Apply visual tilt based on movement direction
-        if (Math.abs(diffY) > 5) {
-          p.angle = diffY > 0 ? -12 : 12;
+        if (Math.abs(dy) > 2) {
+          p.angle = dy > 0 ? -12 : 12;
         } else {
           p.angle = 0;
         }
+
+        // Save current touch as last touch for next tick calculation
+        touchState.current.lastX = touchState.current.x;
+        touchState.current.lastY = touchState.current.y;
 
         // Auto fire bullet on drag
         if (now - lastBulletTimeRef.current > bulletCooldown) {
@@ -805,34 +809,34 @@ export default function LittlePilot() {
     <div className="little-pilot-body-wrapper">
       <div className="game-container">
         
+        {/* CONTROL BUTTONS HEADER BAR */}
+        <div className="header-actions">
+          {(gameState === "playing" || gameState === "paused") && (
+            <button className="action-btn restart-btn" onClick={handleRestartGame}>
+              ↻ RESTART
+            </button>
+          )}
+          {gameState === "playing" && (
+            <button className="action-btn pause-btn" onClick={handlePauseToggle}>
+              ⏸ PAUSE
+            </button>
+          )}
+          {gameState === "paused" && (
+            <button className="action-btn pause-btn" onClick={handlePauseToggle}>
+              ▶ RESUME
+            </button>
+          )}
+          <button
+            className={`action-btn sound-btn ${muted ? "muted" : ""}`}
+            onClick={() => setMuted(!muted)}
+          >
+            {muted ? "🔇 MUTED" : "🔊 SOUND"}
+          </button>
+        </div>
+
         {/* Arcade Cabinet Screen */}
         <div className="arcade-cabinet">
           <div className="screen-wrapper">
-            
-            {/* ABSOLUTE CONTROL BUTTONS HEADER */}
-            <div className="header-actions">
-              {(gameState === "playing" || gameState === "paused") && (
-                <button className="action-btn restart-btn" onClick={handleRestartGame}>
-                  ↻ RESTART
-                </button>
-              )}
-              {gameState === "playing" && (
-                <button className="action-btn pause-btn" onClick={handlePauseToggle}>
-                  ⏸ PAUSE
-                </button>
-              )}
-              {gameState === "paused" && (
-                <button className="action-btn pause-btn" onClick={handlePauseToggle}>
-                  ▶ RESUME
-                </button>
-              )}
-              <button
-                className="action-btn sound-btn"
-                onClick={() => setMuted(!muted)}
-              >
-                {muted ? "🔇 MUTE" : "🔊 SOUND"}
-              </button>
-            </div>
 
             {/* Menu Overlay */}
             {gameState === "menu" && (
@@ -900,13 +904,13 @@ export default function LittlePilot() {
                   touchState.current.active = true;
                   const touch = e.touches[0];
                   if (canvasRef.current) {
-                    const coords = {
-                      clientX: touch.clientX,
-                      clientY: touch.clientY,
-                    };
                     const rect = canvasRef.current.getBoundingClientRect();
-                    touchState.current.x = ((coords.clientX - rect.left) / rect.width) * 1200;
-                    touchState.current.y = ((coords.clientY - rect.top) / rect.height) * 800;
+                    const currentX = ((touch.clientX - rect.left) / rect.width) * 1200;
+                    const currentY = ((touch.clientY - rect.top) / rect.height) * 800;
+                    touchState.current.x = currentX;
+                    touchState.current.y = currentY;
+                    touchState.current.lastX = currentX;
+                    touchState.current.lastY = currentY;
                   }
                 }}
                 onTouchMove={(e) => {
@@ -926,8 +930,12 @@ export default function LittlePilot() {
                   touchState.current.active = true;
                   if (canvasRef.current) {
                     const rect = canvasRef.current.getBoundingClientRect();
-                    touchState.current.x = ((e.clientX - rect.left) / rect.width) * 1200;
-                    touchState.current.y = ((e.clientY - rect.top) / rect.height) * 800;
+                    const currentX = ((e.clientX - rect.left) / rect.width) * 1200;
+                    const currentY = ((e.clientY - rect.top) / rect.height) * 800;
+                    touchState.current.x = currentX;
+                    touchState.current.y = currentY;
+                    touchState.current.lastX = currentX;
+                    touchState.current.lastY = currentY;
                   }
                 }}
                 onMouseMove={(e) => {
@@ -950,66 +958,64 @@ export default function LittlePilot() {
           </div>
         </div>
 
-        {/* Mobile Virtual Controller Controls (displayed only on mobile viewports) */}
-        {gameState === "playing" && (
-          <div className="mobile-controls">
-            <div className="joystick-pad">
-              <button
-                className="joy-btn joy-up select-none touch-none"
-                onTouchStart={(e) => { e.preventDefault(); setVirtualKey("w", true); }}
-                onTouchEnd={(e) => { e.preventDefault(); setVirtualKey("w", false); }}
-                onMouseDown={() => setVirtualKey("w", true)}
-                onMouseUp={() => setVirtualKey("w", false)}
-                onMouseLeave={() => setVirtualKey("w", false)}
-              >
-                ▲
-              </button>
-              <button
-                className="joy-btn joy-left select-none touch-none"
-                onTouchStart={(e) => { e.preventDefault(); setVirtualKey("a", true); }}
-                onTouchEnd={(e) => { e.preventDefault(); setVirtualKey("a", false); }}
-                onMouseDown={() => setVirtualKey("a", true)}
-                onMouseUp={() => setVirtualKey("a", false)}
-                onMouseLeave={() => setVirtualKey("a", false)}
-              >
-                ◀
-              </button>
-              <button
-                className="joy-btn joy-right select-none touch-none"
-                onTouchStart={(e) => { e.preventDefault(); setVirtualKey("d", true); }}
-                onTouchEnd={(e) => { e.preventDefault(); setVirtualKey("d", false); }}
-                onMouseDown={() => setVirtualKey("d", true)}
-                onMouseUp={() => setVirtualKey("d", false)}
-                onMouseLeave={() => setVirtualKey("d", false)}
-              >
-                ▶
-              </button>
-              <button
-                className="joy-btn joy-down select-none touch-none"
-                onTouchStart={(e) => { e.preventDefault(); setVirtualKey("s", true); }}
-                onTouchEnd={(e) => { e.preventDefault(); setVirtualKey("s", false); }}
-                onMouseDown={() => setVirtualKey("s", true)}
-                onMouseUp={() => setVirtualKey("s", false)}
-                onMouseLeave={() => setVirtualKey("s", false)}
-              >
-                ▼
-              </button>
-            </div>
-            
-            <div className="action-pad">
-              <button
-                className="fire-btn select-none touch-none"
-                onTouchStart={(e) => { e.preventDefault(); setVirtualKey(" ", true); }}
-                onTouchEnd={(e) => { e.preventDefault(); setVirtualKey(" ", false); }}
-                onMouseDown={() => setVirtualKey(" ", true)}
-                onMouseUp={() => setVirtualKey(" ", false)}
-                onMouseLeave={() => setVirtualKey(" ", false)}
-              >
-                FIRE
-              </button>
-            </div>
+        {/* Mobile Virtual Controller Controls (displayed on mobile viewports in all states) */}
+        <div className="mobile-controls">
+          <div className="joystick-pad">
+            <button
+              className="joy-btn joy-up select-none touch-none"
+              onTouchStart={(e) => { e.preventDefault(); setVirtualKey("w", true); }}
+              onTouchEnd={(e) => { e.preventDefault(); setVirtualKey("w", false); }}
+              onMouseDown={() => setVirtualKey("w", true)}
+              onMouseUp={() => setVirtualKey("w", false)}
+              onMouseLeave={() => setVirtualKey("w", false)}
+            >
+              ▲
+            </button>
+            <button
+              className="joy-btn joy-left select-none touch-none"
+              onTouchStart={(e) => { e.preventDefault(); setVirtualKey("a", true); }}
+              onTouchEnd={(e) => { e.preventDefault(); setVirtualKey("a", false); }}
+              onMouseDown={() => setVirtualKey("a", true)}
+              onMouseUp={() => setVirtualKey("a", false)}
+              onMouseLeave={() => setVirtualKey("a", false)}
+            >
+              ◀
+            </button>
+            <button
+              className="joy-btn joy-right select-none touch-none"
+              onTouchStart={(e) => { e.preventDefault(); setVirtualKey("d", true); }}
+              onTouchEnd={(e) => { e.preventDefault(); setVirtualKey("d", false); }}
+              onMouseDown={() => setVirtualKey("d", true)}
+              onMouseUp={() => setVirtualKey("d", false)}
+              onMouseLeave={() => setVirtualKey("d", false)}
+            >
+              ▶
+            </button>
+            <button
+              className="joy-btn joy-down select-none touch-none"
+              onTouchStart={(e) => { e.preventDefault(); setVirtualKey("s", true); }}
+              onTouchEnd={(e) => { e.preventDefault(); setVirtualKey("s", false); }}
+              onMouseDown={() => setVirtualKey("s", true)}
+              onMouseUp={() => setVirtualKey("s", false)}
+              onMouseLeave={() => setVirtualKey("s", false)}
+            >
+              ▼
+            </button>
           </div>
-        )}
+          
+          <div className="action-pad">
+            <button
+              className="fire-btn select-none touch-none"
+              onTouchStart={(e) => { e.preventDefault(); setVirtualKey(" ", true); }}
+              onTouchEnd={(e) => { e.preventDefault(); setVirtualKey(" ", false); }}
+              onMouseDown={() => setVirtualKey(" ", true)}
+              onMouseUp={() => setVirtualKey(" ", false)}
+              onMouseLeave={() => setVirtualKey(" ", false)}
+            >
+              FIRE
+            </button>
+          </div>
+        </div>
 
       </div>
     </div>

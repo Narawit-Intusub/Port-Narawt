@@ -650,3 +650,80 @@
   /* เมื่อเอาเมาส์ชี้จะมีเส้นใต้ */
   text-decoration: underline;
 }
+
+/* ===== Mobile Instruction Text ===== */
+.claw-machine-body-wrapper .mobile-instruction {
+  display: none;
+  text-align: center;
+  padding: 12px 16px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--brown);
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  margin-top: 8px;
+  max-width: calc(var(--m) * var(--machine-width));
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.claw-machine-body-wrapper .mobile-instruction strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: #333;
+}
+
+/* ===== Responsive Styles ===== */
+@media (max-width: 768px), (pointer: coarse) {
+  .claw-machine-body-wrapper {
+    height: auto;
+    min-height: 100vh;
+    padding: 8px;
+  }
+
+  .claw-machine-body-wrapper .wrapper {
+    height: auto;
+    min-height: 100vh;
+    padding: 16px 0;
+  }
+
+  .claw-machine-body-wrapper .mobile-instruction {
+    display: block;
+  }
+
+  /* Larger button touch targets */
+  .claw-machine-body-wrapper button {
+    --w: 32px;
+    --h: 32px;
+    margin: 10px 10px 0 0;
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Active/pressed button feedback */
+  .claw-machine-body-wrapper .active {
+    animation: pulse infinite 0.8s;
+  }
+
+  .claw-machine-body-wrapper .sign {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    text-align: center;
+    margin-top: 12px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 380px) {
+  .claw-machine-body-wrapper {
+    --m: 1.6;
+  }
+
+  .claw-machine-body-wrapper .wrapper {
+    padding: 8px 0;
+  }
+}

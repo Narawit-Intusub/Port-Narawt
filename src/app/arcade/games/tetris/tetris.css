@@ -1,5 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+.tetris-body-wrapper,
+.tetris-body-wrapper *,
+.tetris-body-wrapper *::before,
+.tetris-body-wrapper *::after {
+  box-sizing: border-box;
+}
+
 .tetris-body-wrapper {
   & {
     margin: 0;
@@ -14,7 +21,6 @@
     align-items: center;
     overflow-x: hidden;
     position: relative;
-    box-sizing: border-box;
   }
 
   .game-container {
@@ -83,14 +89,23 @@
     100% { opacity: 0.99; }
   }
 
-  /* Sound / Back Control Buttons */
+  /* Sound / Control Buttons Header */
   .header-actions {
-    position: absolute;
-    top: 20px;
-    right: 30px;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: 12px;
+    width: 100%;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, rgba(18, 19, 30, 0.6) 0%, rgba(10, 11, 18, 0.8) 100%);
+    border: 2px solid rgba(0, 229, 255, 0.15);
+    border-radius: 12px;
+    padding: 10px 16px;
+    box-shadow: 
+      0 4px 15px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    box-sizing: border-box;
     z-index: 30;
     pointer-events: auto;
   }
@@ -146,12 +161,24 @@
     box-shadow: 0 0 10px rgba(255, 157, 0, 0.4);
   }
 
+  .sound-btn.muted {
+    border-color: rgba(255, 62, 62, 0.35);
+    color: #ff3e3e;
+  }
+
+  .sound-btn.muted:hover {
+    background: #ff3e3e;
+    color: #fff;
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 62, 62, 0.5);
+  }
+
   /* Tetris Game Layout */
   .tetris-layout {
     display: flex;
     width: 100%;
     height: 100%;
-    padding: 72px 30px 20px 30px; /* Space for absolute header actions */
+    padding: 20px 30px 20px 30px; /* Space adjusted for external header actions */
     box-sizing: border-box;
     justify-content: space-between;
     align-items: stretch;
@@ -193,10 +220,13 @@
   }
 
   .game-canvas {
-    width: 100%;
+    width: auto;
     height: 100%;
+    aspect-ratio: 1/2;
+    margin: 0 auto;
     display: block;
     image-rendering: pixelated;
+    touch-action: none;
   }
 
   /* HUD Display Box (Glassmorphic Glow) */
@@ -577,38 +607,189 @@
     background: radial-gradient(circle at 50% 35%, #5ff2ff 0%, #00b2c7 50%, #006875 90%);
   }
 
-  /* Responsive styling */
-  @media (max-width: 768px) {
+  /* ============ Mobile Compact HUD Bar (above cabinet) ============ */
+  .mobile-hud-bar {
+    display: none;
+    width: 100%;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, rgba(18, 19, 30, 0.95) 0%, rgba(8, 9, 16, 0.95) 100%);
+    border: 2px solid #2f324e;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    justify-content: space-around;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+  }
+
+  .mobile-hud-item {
+    text-align: center;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .mobile-hud-label {
+    font-size: 0.4rem;
+    color: #ff9d00;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+
+  .mobile-hud-val {
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+  }
+
+  .mobile-hud-val.highlight {
+    color: #ff9d00;
+  }
+
+  /* ============ Responsive styling ============ */
+  /* Touch Controls display on any touch screen or medium screens */
+  @media (pointer: coarse), (max-width: 1024px) {
     .mobile-controls {
       display: flex;
+      touch-action: none;
+      -webkit-touch-callout: none;
+      padding: 14px 16px;
+      border-radius: 16px;
+      margin-top: 12px;
     }
-    
+
+    .joystick-pad {
+      grid-template-columns: repeat(3, 44px);
+      grid-template-rows: repeat(3, 44px);
+      gap: 5px;
+      padding: 8px;
+    }
+
+    .joy-btn {
+      touch-action: none;
+      -webkit-touch-callout: none;
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    .circ-btn {
+      width: 62px;
+      height: 62px;
+      font-size: 0.48rem;
+      touch-action: none;
+      -webkit-touch-callout: none;
+    }
+
+    .action-buttons {
+      gap: 8px;
+    }
+  }
+
+  /* Tablet Layout Optimization (601px to 1024px) - Landscape cabinet preserved */
+  @media (max-width: 1024px) {
+    .game-container {
+      margin-top: 45px;
+      padding: 10px;
+    }
+
     .arcade-cabinet {
-      border: 6px solid #23253a;
-      border-radius: 12px;
-      aspect-ratio: auto;
-      height: 480px;
-      width: 100%;
+      border: 8px solid #23253a;
+      border-radius: 16px;
+      /* Aspect ratio remains 3/2 desktop layout */
     }
 
     .tetris-layout {
-      padding: 60px 10px 10px 10px;
-      gap: 5px;
-    }
-
-    .center-field {
-      width: 220px;
-      min-width: 220px;
-      height: 100%;
+      padding: 24px 16px 16px 16px;
+      gap: 12px;
     }
 
     .side-panel {
       gap: 10px;
+      min-width: 110px;
     }
 
     .hud-box {
+      width: auto;
+      min-width: 100px;
+      padding: 8px 12px;
+    }
+
+    .hud-title {
+      font-size: 0.45rem;
+      margin-bottom: 6px;
+    }
+
+    .hud-value {
+      font-size: 0.65rem;
+    }
+
+    .preview-canvas-wrapper {
       width: 60px;
-      padding: 4px 6px;
+      height: 60px;
+    }
+
+    .instructions-box {
+      display: none;
+    }
+
+    .header-actions {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .action-btn {
+      padding: 8px 10px;
+      font-size: 0.6rem;
+      min-height: 36px;
+    }
+  }
+
+  /* ============ Phone / Vertical Layout (≤ 600px) ============ */
+  @media (max-width: 600px) {
+    .mobile-hud-bar {
+      display: flex;
+    }
+
+    .arcade-cabinet {
+      border: 6px solid #23253a;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 5/6; /* Vertical format only on narrow screens */
+      margin: 0 auto;
+    }
+
+    .tetris-layout {
+      padding: 8px;
+      gap: 4px;
+    }
+
+    .center-field {
+      width: auto;
+      min-width: 180px;
+      flex: 1;
+      max-width: 240px;
+      height: 100%;
+    }
+
+    .side-panel {
+      gap: 8px;
+      flex: 0 0 auto;
+      min-width: 55px;
+    }
+
+    .right-panel .hud-box:not(:first-child) {
+      display: none;
+    }
+
+    .hud-box {
+      width: auto;
+      min-width: 50px;
+      max-width: 70px;
+      padding: 5px 7px;
       border-width: 1.5px;
     }
 
@@ -622,12 +803,26 @@
     }
 
     .preview-canvas-wrapper {
-      width: 45px;
-      height: 45px;
+      width: 42px;
+      height: 42px;
     }
 
     .instructions-box {
       display: none;
+    }
+
+    .header-actions {
+      padding: 6px 12px;
+      margin-bottom: 8px;
+      gap: 8px;
+      border-radius: 10px;
+    }
+
+    .action-btn {
+      padding: 8px 10px;
+      font-size: 0.55rem;
+      min-height: 36px;
+      border-radius: 8px;
     }
 
     .menu-title {
@@ -641,30 +836,225 @@
     }
 
     .play-btn {
-      padding: 8px 18px;
+      padding: 10px 22px;
       font-size: 0.75rem;
+      min-height: 44px;
+    }
+
+    .new-highscore {
+      font-size: 0.6rem;
     }
   }
 
-  @media (max-width: 410px) {
+  /* ============ Small Phone (≤ 480px) ============ */
+  @media (max-width: 480px) {
+    .game-container {
+      padding: 10px 8px;
+      margin-top: 45px;
+    }
+
+    .arcade-cabinet {
+      border-width: 4px;
+      border-radius: 10px;
+    }
+
     .tetris-layout {
-      padding: 45px 5px 10px 5px;
-      gap: 4px;
+      padding: 6px;
+      gap: 3px;
     }
 
     .center-field {
-      width: 180px;
-      min-width: 180px;
+      min-width: 150px;
+      border-width: 3px;
+    }
+
+    .side-panel {
+      min-width: 46px;
+      gap: 6px;
     }
 
     .hud-box {
-      width: 52px;
-      padding: 3px 4px;
+      min-width: 42px;
+      max-width: 54px;
+      padding: 3px 5px;
+    }
+
+    .hud-title {
+      font-size: 0.3rem;
+    }
+
+    .hud-value {
+      font-size: 0.45rem;
     }
 
     .preview-canvas-wrapper {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
+    }
+
+    .header-actions {
+      padding: 5px 8px;
+      margin-bottom: 6px;
+      gap: 6px;
+    }
+
+    .action-btn {
+      padding: 6px 8px;
+      font-size: 0.45rem;
+      min-height: 32px;
+    }
+
+    .menu-title {
+      font-size: 1rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .menu-subtitle {
+      font-size: 0.45rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .play-btn {
+      padding: 8px 16px;
+      font-size: 0.65rem;
+    }
+
+    .menu-overlay {
+      padding: 12px;
+    }
+
+    /* Compact mobile controls on small phones */
+    .mobile-controls {
+      padding: 10px 12px;
+      margin-top: 8px;
+    }
+
+    .joystick-pad {
+      grid-template-columns: repeat(3, 40px);
+      grid-template-rows: repeat(3, 40px);
+      gap: 4px;
+      padding: 6px;
+    }
+
+    .joy-btn {
+      font-size: 0.8rem;
+    }
+
+    .circ-btn {
+      width: 54px;
+      height: 54px;
+      font-size: 0.42rem;
+    }
+
+    .action-buttons {
+      gap: 6px;
+    }
+
+    /* Mobile HUD bar compact */
+    .mobile-hud-bar {
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+    }
+
+    .mobile-hud-label {
+      font-size: 0.35rem;
+    }
+
+    .mobile-hud-val {
+      font-size: 0.55rem;
+    }
+  }
+
+  /* ============ Ultra-Small Phone (≤ 380px) ============ */
+  @media (max-width: 380px) {
+    .game-container {
+      padding: 6px 4px;
+      margin-top: 40px;
+    }
+
+    .arcade-cabinet {
+      border-width: 3px;
+    }
+
+    .tetris-layout {
+      padding: 4px;
+    }
+
+    .side-panel {
+      min-width: 40px;
+    }
+
+    .center-field {
+      min-width: 130px;
+    }
+
+    .hud-box {
+      min-width: 36px;
+      max-width: 46px;
+      padding: 2px 3px;
+    }
+
+    /* Extra compact controls for ultra-small viewports to prevent overflow */
+    .mobile-controls {
+      padding: 6px 8px;
+      margin-top: 8px;
+    }
+
+    .joystick-pad {
+      grid-template-columns: repeat(3, 32px);
+      grid-template-rows: repeat(3, 32px);
+      gap: 4px;
+      padding: 6px;
+    }
+
+    .joy-btn {
+      min-width: 32px;
+      min-height: 32px;
+      font-size: 0.7rem;
+    }
+
+    .action-buttons {
+      gap: 4px;
+    }
+
+    .circ-btn {
+      width: 42px;
+      height: 42px;
+      font-size: 0.35rem;
+      border-width: 2px;
+    }
+  }
+
+  /* ============ Ultra-Ultra-Small Phone / Smartwatch (≤ 300px) ============ */
+  @media (max-width: 300px) {
+    .mobile-controls {
+      padding: 4px 6px;
+      margin-top: 6px;
+    }
+
+    .joystick-pad {
+      grid-template-columns: repeat(3, 28px);
+      grid-template-rows: repeat(3, 28px);
+      gap: 3px;
+      padding: 4px;
+    }
+
+    .joy-btn {
+      min-width: 28px;
+      min-height: 28px;
+      font-size: 0.6rem;
+    }
+
+    .action-buttons {
+      gap: 3px;
+    }
+
+    .circ-btn {
+      width: 36px;
+      height: 36px;
+      font-size: 0.3rem;
+      border-width: 1.5px;
     }
   }
 }

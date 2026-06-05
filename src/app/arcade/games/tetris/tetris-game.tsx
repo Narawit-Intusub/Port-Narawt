@@ -720,6 +720,12 @@ export default function RetroTetris() {
   // Keyboard control handlers
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent browser default scroll for game control keys in all states
+      const gameKeys = ["arrowleft", "arrowright", "arrowup", "arrowdown", "w", "a", "s", "d", " ", "z", "x", "c", "shift", "p", "escape"];
+      if (gameKeys.includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+
       if (stateRef.current.gameState !== "playing") {
         if (e.key === "p" || e.key === "P" || e.key === "Escape") {
           if (stateRef.current.gameState === "paused") {
@@ -735,19 +741,16 @@ export default function RetroTetris() {
         case "a":
         case "A":
           moveLeft();
-          e.preventDefault();
           break;
         case "ArrowRight":
         case "d":
         case "D":
           moveRight();
-          e.preventDefault();
           break;
         case "ArrowDown":
         case "s":
         case "S":
           softDrop();
-          e.preventDefault();
           break;
         case "ArrowUp":
         case "w":
@@ -755,29 +758,24 @@ export default function RetroTetris() {
         case "x":
         case "X":
           rotateClockwise();
-          e.preventDefault();
           break;
         case "z":
         case "Z":
           rotateCounterClockwise();
-          e.preventDefault();
           break;
         case " ":
           hardDrop();
-          e.preventDefault();
           break;
         case "Shift":
         case "c":
         case "C":
           triggerHold();
-          e.preventDefault();
           break;
         case "p":
         case "P":
         case "Escape":
           setGameState("paused");
           if (soundEngineRef.current) soundEngineRef.current.stopBgm();
-          e.preventDefault();
           break;
         default:
           break;
@@ -1102,35 +1100,55 @@ export default function RetroTetris() {
   return (
     <div className="tetris-body-wrapper">
       <div className="game-container">
+
+        {/* Mobile Compact HUD Bar (visible only on mobile/touch) */}
+        <div className="mobile-hud-bar">
+          <div className="mobile-hud-item">
+            <div className="mobile-hud-label">Score</div>
+            <div className="mobile-hud-val">{score}</div>
+          </div>
+          <div className="mobile-hud-item">
+            <div className="mobile-hud-label">Level</div>
+            <div className="mobile-hud-val">{level}</div>
+          </div>
+          <div className="mobile-hud-item">
+            <div className="mobile-hud-label">Lines</div>
+            <div className="mobile-hud-val">{lines}</div>
+          </div>
+          <div className="mobile-hud-item">
+            <div className="mobile-hud-label">Top</div>
+            <div className="mobile-hud-val highlight">{highScore}</div>
+          </div>
+        </div>
+
+        {/* CONTROL BUTTONS HEADER BAR */}
+        <div className="header-actions">
+          {(gameState === "playing" || gameState === "paused") && (
+            <button className="action-btn restart-btn" onClick={handlePlayGame}>
+              ↻ RESTART
+            </button>
+          )}
+          {gameState === "playing" && (
+            <button className="action-btn pause-btn" onClick={handlePauseToggle}>
+              ⏸ PAUSE
+            </button>
+          )}
+          {gameState === "paused" && (
+            <button className="action-btn pause-btn" onClick={handlePauseToggle}>
+              ▶ RESUME
+            </button>
+          )}
+          <button
+            className={`action-btn sound-btn ${muted ? "muted" : ""}`}
+            onClick={() => setMuted(!muted)}
+          >
+            {muted ? "🔇 MUTED" : "🔊 SOUND"}
+          </button>
+        </div>
         
         {/* CRT Cabinet Box */}
         <div className="arcade-cabinet">
           <div className="screen-wrapper">
-            
-            {/* ABSOLUTE CONTROL BUTTONS HEADER */}
-            <div className="header-actions">
-              {(gameState === "playing" || gameState === "paused") && (
-                <button className="action-btn restart-btn" onClick={handlePlayGame}>
-                  ↻ RESTART
-                </button>
-              )}
-              {gameState === "playing" && (
-                <button className="action-btn pause-btn" onClick={handlePauseToggle}>
-                  ⏸ PAUSE
-                </button>
-              )}
-              {gameState === "paused" && (
-                <button className="action-btn pause-btn" onClick={handlePauseToggle}>
-                  ▶ RESUME
-                </button>
-              )}
-              <button
-                className="action-btn sound-btn"
-                onClick={() => setMuted(!muted)}
-              >
-                {muted ? "🔇 MUTE" : "🔊 SOUND"}
-              </button>
-            </div>
 
             {/* Arcade Screen content */}
             <div className="crt-curve">
@@ -1268,25 +1286,25 @@ export default function RetroTetris() {
           <div className="joystick-pad">
             <button
               className="joy-btn joy-up"
-              onTouchStart={rotateClockwise}
+              onTouchStart={(e) => { e.preventDefault(); rotateClockwise(); }}
             >
               ↻
             </button>
             <button
               className="joy-btn joy-left"
-              onTouchStart={moveLeft}
+              onTouchStart={(e) => { e.preventDefault(); moveLeft(); }}
             >
               ◀
             </button>
             <button
               className="joy-btn joy-right"
-              onTouchStart={moveRight}
+              onTouchStart={(e) => { e.preventDefault(); moveRight(); }}
             >
               ▶
             </button>
             <button
               className="joy-btn joy-down"
-              onTouchStart={softDrop}
+              onTouchStart={(e) => { e.preventDefault(); softDrop(); }}
             >
               ▼
             </button>
@@ -1295,20 +1313,20 @@ export default function RetroTetris() {
           <div className="action-buttons">
             <button
               className="circ-btn btn-hold"
-              onTouchStart={triggerHold}
+              onTouchStart={(e) => { e.preventDefault(); triggerHold(); }}
             >
               HOLD
             </button>
             <button
               className="circ-btn btn-rotate"
-              onTouchStart={rotateCounterClockwise}
+              onTouchStart={(e) => { e.preventDefault(); rotateCounterClockwise(); }}
             >
               ROT
               Z
             </button>
             <button
               className="circ-btn btn-drop"
-              onTouchStart={hardDrop}
+              onTouchStart={(e) => { e.preventDefault(); hardDrop(); }}
             >
               DROP
             </button>

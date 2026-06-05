@@ -140,6 +140,7 @@
 /* Custom resets & smooth scrolling */
 html {
   scroll-behavior: smooth;
+  overscroll-behavior-y: none;
 }
 
 body {

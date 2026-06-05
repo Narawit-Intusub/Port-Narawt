@@ -11,7 +11,9 @@ const ClawMachine: React.FC = () => {
       const targetH = 580;
       const scaleX = window.innerWidth / targetW;
       const scaleY = window.innerHeight / targetH;
-      const newScale = Math.min(scaleX, scaleY, 1);
+      // Allow up to 1.5x on mobile to fill the viewport better
+      const maxScale = window.innerWidth <= 768 ? 1.5 : 1;
+      const newScale = Math.min(scaleX, scaleY, maxScale);
       setScale(newScale);
     };
     handleResize();
@@ -654,6 +656,11 @@ const ClawMachine: React.FC = () => {
             <div className="collection-point pix"></div>
           </div>
         </div>
+      </div>
+      <div className="mobile-instruction">
+        <strong>🎮 วิธีเล่น / How to Play</strong>
+        กดค้างปุ่มลูกศร ◀▶ เพื่อเลื่อนแขนคีบ แล้วกดปุ่ม ▲▼ เพื่อหย่อนลง<br/>
+        Hold arrow buttons to move the claw, then press to drop!
       </div>
       <div className="sign">
         <a href="https://github.com/Narawit-Intusub" target="_blank" rel="noopener noreferrer">

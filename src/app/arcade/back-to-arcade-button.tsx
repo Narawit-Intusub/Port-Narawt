@@ -10,13 +10,13 @@ export function BackToArcadeButton() {
   if (isLobby) return null;
 
   return (
-    <div className="fixed top-6 left-6 z-50">
+    <div className="fixed top-3 left-3 md:top-6 md:left-6 z-50">
       <Link
         href="/arcade"
-        className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-cyan-500/30 bg-slate-900/90 text-cyan-300 font-medium text-sm transition-all duration-300 hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.35)] hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-md"
+        className="flex items-center gap-1.5 md:gap-2.5 px-3 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl border border-cyan-500/30 bg-slate-900/90 text-cyan-300 font-medium text-xs md:text-sm transition-all duration-300 hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.35)] hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-md"
       >
         <svg
-          className="w-4 h-4"
+          className="w-3.5 h-3.5 md:w-4 md:h-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

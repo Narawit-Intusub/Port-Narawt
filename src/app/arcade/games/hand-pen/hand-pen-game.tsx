@@ -687,13 +687,13 @@ export default function HandPenGame() {
       <div className="hud-layer">
         
         {/* Top Header Row */}
-        <div className="hud-header">
+        <div className="hud-header" style={{ flexWrap: "wrap", gap: "8px" }}>
           <div className="hud-title-panel hud-interactive">
             <h1>HAND PEN 🌙</h1>
             <p>GESTURE DRAWING & ART SYSTEM</p>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-2 md:gap-4 flex-wrap items-center justify-end" style={{ marginLeft: "auto" }}>
             {/* FPS Indicator (rendered in HTML HUD to prevent overlap with Back to Arcade button) */}
             {showFps && (
               <div className="hud-status-badge font-mono text-[#10B981] border-[#10B981]/30">
